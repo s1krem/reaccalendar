@@ -1,0 +1,32 @@
+.has-event {
+    background: #ffecb3 !important;
+    border: 1px solid #ff9800;
+  }
+
+  .tile-events {
+    margin-top: 0.5rem;
+  }
+  
+  .holiday-item {
+    background: rgba(33, 243, 33, 0.2); 
+    border: 1px solid #2196f3;
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 0.75rem;
+    color: #0d47a1;
+    text-align: center;
+  }
+
+  .reminder-item {
+    background: rgba(255, 152, 0, 0.2);
+    border: 1px solid #ff9800;
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin-bottom: 2px;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  
+  .reminder-item:hover {
+    background: rgba(255, 152, 0, 0.4);
+  }

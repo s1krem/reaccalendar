@@ -3,10 +3,7 @@ export interface Reminder {
     title: string;
     description: string;
     startTime: string;
-    recurrence?: string | null;
-    recurrenceEndTime?: string | null;
-    createdDate?: string;
-    updatedDate?: string;
+    endTime: string;
   }
   
   export interface Holiday {

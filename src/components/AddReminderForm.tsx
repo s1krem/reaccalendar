@@ -33,6 +33,7 @@ const AddReminderForm: React.FC<AddReminderFormProps> = ({ onAdd }) => {
             title: values.title,
             description: values.description,
             startTime: values.startTime.toISOString(),
+            endTime: values.startTime.toISOString(),
           };
           await addReminder(reminderData);
           onAdd();       // Refresh parent reminder list
