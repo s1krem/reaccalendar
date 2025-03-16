@@ -1,32 +1,70 @@
-// src/components/EventFormModal.tsx
 import React from "react";
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
-import { Formik, Form, Field } from "formik";
+import Autocomplete from "@mui/material/Autocomplete";
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import { Reminder } from "../types";
 import dayjs from "dayjs";
+import { Reminder } from "../types";
 
 interface EventFormModalProps {
   open: boolean;
-  initialData?: Reminder; // for editing; if undefined, it’s for adding
+  initialData?: Reminder; // if provided, we're editing an event
   onClose: () => void;
   onSubmit: (data: Reminder) => void;
 }
 
-// Validation schema using Yup
+const ITEM_HEIGHT = 48;
+
+// Generate time options in 15-minute increments (24-hour format)
+const generateTimeOptions = () => {
+  const times: string[] = [];
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      times.push(dayjs().hour(hour).minute(minute).format("HH:mm"));
+    }
+  }
+  return times;
+};
+
+const TIME_OPTIONS = generateTimeOptions();
+
+// Validation schema using separate fields
 const EventSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   description: Yup.string().required("Description is required"),
-  startTime: Yup.date().required("Start time is required"),
-  endTime: Yup.date().required("End time is required"),
+  date: Yup.string().required("Date is required"),
+  startHour: Yup.string().required("Start time is required"),
+  endHour: Yup.string()
+    .required("End time is required")
+    .test("min-duration", "End time must be at least 15 minutes after start time", function (value) {
+      const { date, startHour } = this.parent;
+      if (!date || !startHour || !value) return true;
+      const start = dayjs(`${date} ${startHour}`, "YYYY-MM-DD HH:mm");
+      const end = dayjs(`${date} ${value}`, "YYYY-MM-DD HH:mm");
+      return end.diff(start, "minute") >= 15;
+    }),
 });
 
 const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onClose, onSubmit }) => {
-  const initialValues: Reminder = {
+  // Derive initial values for date and time separately.
+  const initialDate = initialData?.startTime
+    ? dayjs(initialData.startTime).format("YYYY-MM-DD")
+    : dayjs().format("YYYY-MM-DD");
+
+  const initialStartHour = initialData?.startTime
+    ? dayjs(initialData.startTime).format("HH:mm")
+    : dayjs().format("HH:mm");
+
+  const initialEndHour = initialData?.endTime
+    ? dayjs(initialData.endTime).format("HH:mm")
+    : dayjs().add(1, "hour").format("HH:mm");
+
+  const initialValues = {
     title: initialData?.title || "",
     description: initialData?.description || "",
-    startTime: initialData?.startTime || dayjs().format("YYYY-MM-DD HH:mm:ss"),
-    endTime: initialData?.endTime || dayjs().add(1, "hour").format("YYYY-MM-DD HH:mm:ss"),
+    date: initialDate,
+    startHour: initialStartHour,
+    endHour: initialEndHour,
   };
 
   return (
@@ -36,12 +74,25 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
         initialValues={initialValues}
         validationSchema={EventSchema}
         onSubmit={(values, { setSubmitting }) => {
-          onSubmit(values);
+          // Combine date and time fields into full timestamps (seconds set to "00")
+          const startTime = dayjs(`${values.date} ${values.startHour}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm:ss");
+          const endTime = dayjs(`${values.date} ${values.endHour}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm:ss");
+
+          const finalData: Reminder = {
+            ...initialData, // preserve existing fields (e.g. id) if editing
+            title: values.title,
+            description: values.description,
+            startTime,
+            endTime,
+          };
+
+          console.log("Submitting Event:", finalData); // Debug log
+          onSubmit(finalData);
           setSubmitting(false);
           onClose();
         }}
       >
-        {({ values, errors, touched, handleChange, handleBlur }) => (
+        {({ values, errors, touched, handleChange, handleBlur, setFieldValue }) => (
           <Form>
             <DialogContent dividers>
               <TextField
@@ -58,6 +109,7 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                 error={touched.title && Boolean(errors.title)}
                 helperText={touched.title && errors.title}
               />
+
               <TextField
                 margin="dense"
                 id="description"
@@ -73,34 +125,76 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                 error={touched.description && Boolean(errors.description)}
                 helperText={touched.description && errors.description}
               />
+
+              {/* Date Input */}
               <TextField
                 margin="dense"
-                id="startTime"
-                name="startTime"
-                label="Start Time"
-                type="datetime-local"
+                id="date"
+                name="date"
+                label="Date"
+                type="date"
                 fullWidth
-                value={dayjs(values.startTime).format("YYYY-MM-DD HH:mm")}
-                onChange={(e) => {
-                  // Convert the local input value back to our string format
-                  const dateVal = dayjs(e.target.value).format("YYYY-MM-DD HH:mm:ss");
-                  handleChange({ target: { name: "startTime", value: dateVal } });
-                }}
-                InputLabelProps={{ shrink: true }}
+                value={values.date}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                error={touched.date && Boolean(errors.date)}
+                helperText={touched.date && errors.date}
               />
-              <TextField
-                margin="dense"
-                id="endTime"
-                name="endTime"
-                label="End Time"
-                type="datetime-local"
-                fullWidth
-                value={dayjs(values.endTime).format("YYYY-MM-DD HH:mm")}
-                onChange={(e) => {
-                  const dateVal = dayjs(e.target.value).format("YYYY-MM-DD HH:mm:ss");
-                  handleChange({ target: { name: "endTime", value: dateVal } });
+
+              {/* Start Hour Input as Autocomplete (freeSolo allows manual entry) */}
+              <Autocomplete
+                freeSolo
+                options={TIME_OPTIONS}
+                ListboxProps={{
+                  style: { maxHeight: ITEM_HEIGHT * 6 },
                 }}
-                InputLabelProps={{ shrink: true }}
+                value={values.startHour}
+                onChange={(event, newValue) => {
+                  setFieldValue("startHour", newValue || "");
+                }}
+                onInputChange={(event, newInputValue) => {
+                  setFieldValue("startHour", newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    id="startHour"
+                    name="startHour"
+                    label="Start Time (24h format)"
+                    fullWidth
+                    error={touched.startHour && Boolean(errors.startHour)}
+                    helperText={touched.startHour && errors.startHour}
+                  />
+                )}
+              />
+
+              {/* End Hour Input as Autocomplete (freeSolo allows manual entry) */}
+              <Autocomplete
+                freeSolo
+                options={TIME_OPTIONS}
+                ListboxProps={{
+                  style: { maxHeight: ITEM_HEIGHT * 6 },
+                }}
+                value={values.endHour}
+                onChange={(event, newValue) => {
+                  setFieldValue("endHour", newValue || "");
+                }}
+                onInputChange={(event, newInputValue) => {
+                  setFieldValue("endHour", newInputValue);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    id="endHour"
+                    name="endHour"
+                    label="End Time (24h format)"
+                    fullWidth
+                    error={touched.endHour && Boolean(errors.endHour)}
+                    helperText={touched.endHour && errors.endHour}
+                  />
+                )}
               />
             </DialogContent>
             <DialogActions>

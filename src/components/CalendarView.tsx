@@ -23,6 +23,7 @@ const CalendarView: React.FC = () => {
 
   const loadReminders = async () => {
     const data = await fetchReminders();
+    console.log("Fetched reminders after update:", data);
     setReminders(data);
   };
 
