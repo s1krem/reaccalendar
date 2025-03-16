@@ -1,8 +1,8 @@
 import React from "react";
-import CalendarView from "./components/CalendarView";
+import MyCalendar from "./components/MyCalendar";
 
 function App() {
-  return <CalendarView />;
+  return <MyCalendar />;
 }
 
 export default App;

@@ -1,0 +1,17 @@
+.react-calendar {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+  
+  .react-calendar__tile--now {
+    background: #ffe6e6;
+  }
+  
+  .react-calendar__tile--active {
+    background: #ffb3b3;
+  }
+  
+  .react-calendar__tile.has-event {
+    background: #a318a8; 
+    border: 1px solid rgb(92, 16, 116);
+  }
