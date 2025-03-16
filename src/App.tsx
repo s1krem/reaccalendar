@@ -1,8 +1,8 @@
-import React from 'react';
-import './App.css';
+import React from "react";
+import CalendarView from "./components/CalendarView";
 
 function App() {
-  return <div>Hello</div>
+  return <CalendarView />;
 }
 
 export default App;
