@@ -1,32 +1,105 @@
+.react-calendar {
+  border: none;
+  width: 100%;
+  font-family: Roboto, sans-serif;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.react-calendar__navigation {
+  background-color: #1976d2; 
+  border-radius: 8px 8px 0 0;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.react-calendar__navigation button {
+  color: #fff;
+  min-height: 40px;
+}
+
+.react-calendar__month-view__days__day {
+  width: 80px;       /* or 70px, tweak as you like */
+  height: 80px;      /* keep the same dimension to make it roughly square */
+  max-width: 80px;
+  max-height: 80px;
+  overflow: hidden;  /* hide anything that overflows */
+  position: relative; /* allows for child positioning if needed */
+}
+
+.react-calendar__tile:hover {
+  background-color: rgba(25, 118, 210, 0.1); 
+  cursor: pointer;
+}
+
+/* Selected day styling */
+.react-calendar__tile--active {
+  background-color: rgba(25, 118, 210, 0.2) !important;
+  color: #1976d2 !important;
+  font-weight: bold;
+}
+
+/* Use your custom classes below */
 .has-event {
-    background: #ffecb3 !important;
-    border: 1px solid #ff9800;
-  }
+  /* This class is applied to tiles that have events/holidays */
+  background: #fff8e1 !important; /* Light amber */
+  border: 1px solid #ffd54f;
+  border-radius: 4px;
+}
 
-  .tile-events {
-    margin-top: 0.5rem;
-  }
-  
-  .holiday-item {
-    background: rgba(33, 243, 33, 0.2); 
-    border: 1px solid #2196f3;
-    border-radius: 4px;
-    padding: 2px 4px;
-    font-size: 0.75rem;
-    color: #0d47a1;
-    text-align: center;
-  }
+.tile-events {
+  max-height: 40px;
+  overflow-y: auto;
+  margin-top: 4px;
+}
 
-  .reminder-item {
-    background: rgba(255, 152, 0, 0.2);
-    border: 1px solid #ff9800;
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin-bottom: 2px;
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-  
-  .reminder-item:hover {
-    background: rgba(255, 152, 0, 0.4);
-  }
+/* Holiday styling */
+.holiday-item {
+  background: rgba(33, 243, 33, 0.2);
+  border: 1px solid #2196f3;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  color: #0d47a1;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+/* Reminder styling */
+.reminder-item {
+  display: flex;
+  align-items: center;
+  background-color: #e3f2fd; /* a soft background color, e.g. light blue */
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin-bottom: 2px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  color: #1565c0; /* a darker shade for text */
+  border: 1px solid #bbdefb; /* subtle border */
+
+  /* If you want a subtle drop shadow: */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: background-color 0.2s ease-in-out;
+}
+
+.reminder-item:hover {
+  background: #bbdefb;;
+}
+
+.reminder-pill {
+  background-color: #296ead;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  margin-bottom: 2px;
+  cursor: pointer;
+  white-space: nowrap; /* keep text on one line */
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.reminder-pill:hover {
+  background-color: #fb8c00; /* slightly darker on hover */
+}
