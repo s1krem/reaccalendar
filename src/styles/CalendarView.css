@@ -2,12 +2,18 @@
   border: none;
   width: 100%;
   font-family: Roboto, sans-serif;
-  background-color: #fff;
+  background-color: #2e2e2e;
   border-radius: 8px;
+  color: #ececec;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.react-calendar__month-view__days__day--neighboringMonth {
+  display: none;
 }
 
 .react-calendar__navigation {
-  background-color: #1976d2; 
+  background-color: #1f1f1f;
   border-radius: 8px 8px 0 0;
   color: #fff;
   margin-bottom: 0.5rem;
@@ -16,90 +22,175 @@
 .react-calendar__navigation button {
   color: #fff;
   min-height: 40px;
+  background: none;
+  border: none;
+}
+
+.react-calendar__month-view__weekdays {
+  margin-bottom: 0;
+  background-color: #1f1f1f;
+  color: #ccc;
 }
 
 .react-calendar__month-view__days__day {
-  width: 80px;       /* or 70px, tweak as you like */
-  height: 80px;      /* keep the same dimension to make it roughly square */
-  max-width: 80px;
-  max-height: 80px;
-  overflow: hidden;  /* hide anything that overflows */
-  position: relative; /* allows for child positioning if needed */
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0;
+  background-color: transparent;
+  color: #fff;
+}
+
+.react-calendar__tile {
+  width: 80px !important;
+  height: 80px !important;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 4px;
+  background-color: #3a3a3a;
+  color: #ececec;
+  border-radius: 4px;
 }
 
 .react-calendar__tile:hover {
-  background-color: rgba(25, 118, 210, 0.1); 
+  background-color: #4a4a4a;
+  cursor: pointer;
+}
+.react-calendar__navigation button:hover:not(:disabled) {
+  background-color: #3b3b3b !important;
   cursor: pointer;
 }
 
-/* Selected day styling */
 .react-calendar__tile--active {
-  background-color: rgba(25, 118, 210, 0.2) !important;
-  color: #1976d2 !important;
+  background-color: #5c2c2c !important;
+  color: #fff !important;
   font-weight: bold;
 }
 
-/* Use your custom classes below */
 .has-event {
-  /* This class is applied to tiles that have events/holidays */
-  background: #fff8e1 !important; /* Light amber */
-  border: 1px solid #ffd54f;
+  background: #c04e4e !important;
+  border: 1px solid #1976d2;
   border-radius: 4px;
+}
+
+.today-tile {
+  background-color: #774545 !important;
+  color: #fff !important;
 }
 
 .tile-events {
-  max-height: 40px;
-  overflow-y: auto;
-  margin-top: 4px;
-}
-
-/* Holiday styling */
-.holiday-item {
-  background: rgba(33, 243, 33, 0.2);
-  border: 1px solid #2196f3;
-  border-radius: 4px;
-  padding: 2px 4px;
-  font-size: 0.75rem;
-  color: #0d47a1;
-  text-align: center;
-  margin-bottom: 2px;
-}
-
-/* Reminder styling */
-.reminder-item {
   display: flex;
-  align-items: center;
-  background-color: #e3f2fd; /* a soft background color, e.g. light blue */
-  border-radius: 4px;
-  padding: 2px 6px;
-  margin-bottom: 2px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  color: #1565c0; /* a darker shade for text */
-  border: 1px solid #bbdefb; /* subtle border */
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
-  /* If you want a subtle drop shadow: */
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-  transition: background-color 0.2s ease-in-out;
+.holiday-item,
+.reminder-item {
+  width: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+.holiday-item {
+  background-color: #2a8041;
+  color: #ffffff;
+}
+
+.reminder-item {
+  background-color: #3f1c1c;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
 .reminder-item:hover {
-  background: #bbdefb;;
+  background-color: #6e3232;
 }
 
-.reminder-pill {
-  background-color: #296ead;
-  color: #fff;
-  border-radius: 12px;
-  padding: 2px 6px;
-  font-size: 0.7rem;
-  margin-bottom: 2px;
+.reminders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+/* Make past and out-of-range dates visually distinct */
+.disabled-tile {
+  background-color: #2a2a2a !important;
+  color: #666 !important;
+  pointer-events: none; /* Prevent clicking */
+  opacity: 0.5;
+}
+
+/* Make event days more visually appealing */
+.has-event {
+  background-color: #5a2a2a !important;
+  border: 1px solid #8b0000;
+  border-radius: 4px;
+}
+
+/* Hover effect for regular days */
+.react-calendar__tile:hover:not(.disabled-tile) {
+  background-color: #444 !important;
+}
+
+/* Disabled navigation buttons */
+.react-calendar__navigation button:disabled {
+  background-color: #2a2a2a !important;
+  color: #666 !important;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.react-calendar__navigation button:enabled:active,
+.react-calendar__navigation button:enabled:focus {
+  background-color: #3b3b3b !important;
+  color: #fff !important;
+  outline: none;
+}
+
+.react-calendar__year-view__months .react-calendar__tile {
+  background-color: #2b2b2b;
+  color: #ececec;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+
+.react-calendar__year-view__months .react-calendar__tile:hover {
+  background-color: #3b3b3b;
   cursor: pointer;
-  white-space: nowrap; /* keep text on one line */
-  text-overflow: ellipsis;
-  overflow: hidden;
 }
 
-.reminder-pill:hover {
-  background-color: #fb8c00; /* slightly darker on hover */
+.react-calendar__year-view__months .react-calendar__tile--active {
+  background-color: #5c2c2c;
+  color: #fff;
+  font-weight: bold;
+}
+
+.react-calendar__year-view__year .react-calendar_tile:hover{
+  background-color: #3b3b3b;
+  cursor: pointer;
+}
+
+.react-calendar__decade-view__years .react-calendar__tile--active {
+  background-color: #3b3b3b !important;
+  color: #fff !important;
+  font-weight: bold;
 }

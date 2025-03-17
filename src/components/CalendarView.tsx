@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
-import dayjs from "dayjs";
 import "react-calendar/dist/Calendar.css";
 import "../styles/CalendarView.css";
+import {
+  Grid,
+  Box,
+  Paper,
+  Container,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import dayjs from "dayjs";
+
 import { fetchHolidays, fetchReminders, addReminder, updateReminder } from "../api";
 import { Reminder, Holiday } from "../types";
 import EventFormModal from "./EventFormModal";
-
-import {AppBar, Toolbar, Typography, Container, Paper, Box, Button,} from "@mui/material";
+import DaySchedule from "./DaySchedule";
 
 const CalendarView: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  // We'll determine 'today' and 'one year from today' once, upon component mount
+  const today = new Date();
+  const oneYearFromToday = dayjs(today).add(1, "year").toDate();
+
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
@@ -22,76 +34,118 @@ const CalendarView: React.FC = () => {
   }, []);
 
   const loadReminders = async () => {
-    const data = await fetchReminders();
-    setReminders(data);
+    try {
+      const data = await fetchReminders();
+      setReminders(data);
+    } catch (error) {
+      console.error("Failed to fetch reminders", error);
+    }
   };
 
-  const dateHasReminder = (date: Date): boolean => {
+  const getRemindersForDate = (date: Date) => {
     const dateString = dayjs(date).format("YYYY-MM-DD");
-    return reminders.some((rem) => rem.startTime.substring(0, 10) === dateString);
+    return reminders.filter(
+      (rem) => rem.startTime.substring(0, 10) === dateString
+    );
   };
 
-  const getHolidayForDate = (date: Date): Holiday | undefined => {
+  const getHolidayForDate = (date: Date) => {
     const dateString = dayjs(date).format("YYYY-MM-DD");
     return holidays.find((hol) => hol.date === dateString);
   };
 
-  const handleDayClick = (date: Date) => {
-    setSelectedDate(date);
-    setEditingEvent(null); 
-    setModalOpen(true);
+  //so long because react-calendar style css is not working properly
+  const tileClassName = ({ date, view }: { date: Date; view: string }) => {
+    if (view !== "month") return "";
+  
+    const todayStart = dayjs().startOf("day").toDate();
+  
+  if (dayjs(date).isSame(todayStart, "day")) {
+    return "today-tile";
+  }
+    const oneYearFromToday = dayjs(today).add(1, "year").toDate();
+  
+    const isPastDate = date < today;
+    const isOutOfRange = date > oneYearFromToday;
+    const hasReminders = getRemindersForDate(date).length > 0;
+    const hasHoliday = !!getHolidayForDate(date);
+  
+    if (isPastDate || isOutOfRange) return "disabled-tile";
+    if (hasReminders || hasHoliday) return "has-event";
+  
+    return "";
   };
-
-  const handleEventClick = (eventData: Reminder, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingEvent(eventData);
-    setModalOpen(true);
-  };
+  
 
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return null;
-  
-    const dayReminders = reminders.filter(
-      (rem) => rem.startTime.substring(0, 10) === dayjs(date).format("YYYY-MM-DD")
-    );
     const holiday = getHolidayForDate(date);
-  
+    const dayReminders = getRemindersForDate(date);
+
     return (
       <div className="tile-events">
-        {/* Show holiday name if needed (can keep as-is or also make it smaller) */}
         {holiday && (
           <div className="holiday-item">
             {holiday.localName || holiday.name}
           </div>
         )}
-  
-        {/* Instead of listing all reminders, just show a small colored pill for each */}
-        {dayReminders.map((reminder, index) => (
-          <div
-            key={reminder.id}
-            className="reminder-pill"
-            onClick={(e) => handleEventClick(reminder, e)}
-          >
-            {/* You could show an icon or a short label. Example: first 5 chars of title */}
-            {reminder.title.slice(0, 5)}…
+        {dayReminders.length > 0 && (
+          <div className="reminders-list">
+            {dayReminders.map((rem) => (
+              <div key={rem.id} className="reminder-item">
+                {rem.title}
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     );
   };
-  
 
-  const tileClassName = ({ date, view }: { date: Date; view: string }) => {
-    if (view === "month" && (getHolidayForDate(date) || dateHasReminder(date))) {
-      return "has-event";
-    }
-    return null;
+  // Called when user clicks on a day in the calendar
+  const handleDayClick = (date: Date) => {
+    // If date is out of range, do nothing
+    if (date < today || date > oneYearFromToday) return;
+    setSelectedDate(date);
   };
 
+  // Called when user clicks an hour slot in DaySchedule
+  const handleAddReminder = (hour: number) => {
+    if (!selectedDate) return;
+    // Double check the date is within allowed range
+    if (selectedDate < today || selectedDate > oneYearFromToday) return;
+
+    const start = dayjs(selectedDate).hour(hour).minute(0).second(0);
+    const end = start.add(1, "hour");
+
+    setEditingEvent({
+      id: undefined,
+      title: "",
+      description: "",
+      startTime: start.format("YYYY-MM-DD HH:mm:ss"),
+      endTime: end.format("YYYY-MM-DD HH:mm:ss"),
+    });
+    setModalOpen(true);
+  };
+
+  // Called when user clicks an existing reminder in DaySchedule
+  const handleEditReminder = (rem: Reminder) => {
+    if (!selectedDate) return;
+
+    const holiday = getHolidayForDate(selectedDate);
+    // If this reminder matches a holiday name, skip editing (our rule)
+    if (holiday && rem.title === (holiday.localName || holiday.name)) {
+      return;
+    }
+    setEditingEvent(rem);
+    setModalOpen(true);
+  };
+
+  // Called when user submits the modal form
   const handleFormSubmit = async (data: Reminder) => {
     try {
-      if (editingEvent && editingEvent.id) {
-        await updateReminder(editingEvent.id, data);
+      if (data.id) {
+        await updateReminder(data.id, data);
       } else {
         await addReminder(data);
       }
@@ -101,65 +155,80 @@ const CalendarView: React.FC = () => {
     }
   };
 
-  // Optional: custom navigation example
-  // If you want to hide the default react-calendar navigation and replace it with MUI icons:
-  //   <Calendar
-  //     ...
-  //     showNavigation={false}
-  //   />
-  // Then create your own "previous month" / "next month" handlers using dayjs or react-calendar's onActiveStartDateChange
+  // Called when user clicks the close button on the schedule panel
+  const handleCloseSchedule = () => {
+    setSelectedDate(null);
+  };
 
   return (
-    <>
-      {/* Top AppBar */}
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            My Professional Calendar
-          </Typography>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Grid container spacing={4}>
+        <Grid item xs={12} md={8}>
+          <Paper
+            sx={{
+              p: 2,
+              height: 600,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
+            <Calendar
+              showNeighboringMonth={false}
+              onChange={(date) => setSelectedDate(date as Date)}
+              value={selectedDate || new Date()}
+              tileClassName={tileClassName}
+              tileContent={tileContent}
+              onClickDay={handleDayClick}
+              // Restrict browsing to [today, today+1 year]
+              minDate={today}
+              maxDate={oneYearFromToday}
+            />
+          </Paper>
+        </Grid>
 
-          <Button color="inherit" onClick={() => setSelectedDate(new Date())}>
-            Today
-          </Button>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content Container */}
-      <Container maxWidth="md" sx={{ mt: 4 }}>
-        <Paper elevation={3} sx={{ p: 2 }}>
-          <Calendar
-            onChange={(date) => setSelectedDate(date as Date)}
-            value={selectedDate}
-            onClickDay={handleDayClick}
-            tileContent={tileContent}
-            tileClassName={tileClassName}
-            // showNavigation={false} // Uncomment if using a custom navigation
-          />
-        </Paper>
-
-        <Box sx={{ mt: 2, textAlign: "center" }}>
-          <Typography variant="subtitle1">
-            Selected date: {selectedDate.toDateString()}
-          </Typography>
-        </Box>
-      </Container>
+        {selectedDate && (
+          <Grid item xs={12} md={4}>
+            <Paper
+              sx={{
+                height: 600,
+                position: "relative",
+                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <IconButton
+                onClick={handleCloseSchedule}
+                sx={{ position: "absolute", top: 8, right: 8, zIndex: 2 }}
+              >
+                <CloseIcon />
+              </IconButton>
+              <Box sx={{ overflowY: "auto", flexGrow: 1, pt: 4, px: 2, pb: 2 }}>
+                <DaySchedule
+                  selectedDate={selectedDate}
+                  reminders={getRemindersForDate(selectedDate)}
+                  holiday={getHolidayForDate(selectedDate)}
+                  onAddReminder={handleAddReminder}
+                  onEditReminder={handleEditReminder}
+                />
+              </Box>
+            </Paper>
+          </Grid>
+        )}
+      </Grid>
 
       <EventFormModal
         open={modalOpen}
-        initialData={
-          editingEvent
-            ? editingEvent
-            : {
-                title: "",
-                description: "",
-                startTime: dayjs(selectedDate).format("YYYY-MM-DD HH:mm:ss"),
-                endTime: dayjs(selectedDate).add(1, "hour").format("YYYY-MM-DD HH:mm:ss"),
-              }
-        }
+        initialData={editingEvent || undefined}
         onClose={() => setModalOpen(false)}
-        onSubmit={handleFormSubmit}
+        onSubmit={(remData) => {
+          setModalOpen(false);
+          handleFormSubmit(remData);
+        }}
+        onDeleteSuccess={loadReminders}
       />
-    </>
+    </Container>
   );
 };
 

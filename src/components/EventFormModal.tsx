@@ -1,21 +1,24 @@
 import React from "react";
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from "@mui/material";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, IconButton, Box } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import dayjs from "dayjs";
 import { Reminder } from "../types";
+import { deleteReminder } from "../api";
+import "../styles/EventFormModal.css"; // Import the new CSS for EventFormModal
 
 interface EventFormModalProps {
   open: boolean;
-  initialData?: Reminder; // if provided, we're editing an event
+  initialData?: Reminder;
   onClose: () => void;
   onSubmit: (data: Reminder) => void;
+  onDeleteSuccess?: () => void;
 }
 
 const ITEM_HEIGHT = 48;
 
-// Generate time options in 15-minute increments (24-hour format)
 const generateTimeOptions = () => {
   const times: string[] = [];
   for (let hour = 0; hour < 24; hour++) {
@@ -28,7 +31,6 @@ const generateTimeOptions = () => {
 
 const TIME_OPTIONS = generateTimeOptions();
 
-// Validation schema using separate fields
 const EventSchema = Yup.object().shape({
   title: Yup.string().required("Title is required"),
   description: Yup.string().required("Description is required"),
@@ -45,8 +47,7 @@ const EventSchema = Yup.object().shape({
     }),
 });
 
-const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onClose, onSubmit }) => {
-  // Derive initial values for date and time separately.
+const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onClose, onSubmit, onDeleteSuccess }) => {
   const initialDate = initialData?.startTime
     ? dayjs(initialData.startTime).format("YYYY-MM-DD")
     : dayjs().format("YYYY-MM-DD");
@@ -67,26 +68,47 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
     endHour: initialEndHour,
   };
 
+  const handleDelete = async () => {
+    if (initialData && initialData.id !== undefined) {
+      if (window.confirm("Are you sure you want to delete this event?")) {
+        try {
+          await deleteReminder(initialData.id);
+          if (onDeleteSuccess) onDeleteSuccess();
+          onClose();
+        } catch (error) {
+          console.error("Failed to delete event", error);
+        }
+      }
+    }
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{initialData ? "Edit Event" : "Add New Event"}</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" className="event-form-modal">
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 2, pt: 2 }}>
+        <DialogTitle sx={{ p: 0, m: 0 }}>
+          {initialData ? "Edit Event" : "Add New Event"}
+        </DialogTitle>
+        {initialData && (
+          <IconButton onClick={handleDelete} aria-label="delete event">
+            <DeleteIcon />
+          </IconButton>
+        )}
+      </Box>
       <Formik
         initialValues={initialValues}
         validationSchema={EventSchema}
         onSubmit={(values, { setSubmitting }) => {
-          // Combine date and time fields into full timestamps (seconds set to "00")
           const startTime = dayjs(`${values.date} ${values.startHour}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm:ss");
           const endTime = dayjs(`${values.date} ${values.endHour}`, "YYYY-MM-DD HH:mm").format("YYYY-MM-DD HH:mm:ss");
 
           const finalData: Reminder = {
-            ...initialData, // preserve existing fields (e.g. id) if editing
+            ...initialData,
             title: values.title,
             description: values.description,
             startTime,
             endTime,
           };
 
-          console.log("Submitting Event:", finalData); // Debug log
           onSubmit(finalData);
           setSubmitting(false);
           onClose();
@@ -109,7 +131,6 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                 error={touched.title && Boolean(errors.title)}
                 helperText={touched.title && errors.title}
               />
-
               <TextField
                 margin="dense"
                 id="description"
@@ -125,8 +146,6 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                 error={touched.description && Boolean(errors.description)}
                 helperText={touched.description && errors.description}
               />
-
-              {/* Date Input */}
               <TextField
                 margin="dense"
                 id="date"
@@ -140,14 +159,10 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                 error={touched.date && Boolean(errors.date)}
                 helperText={touched.date && errors.date}
               />
-
-              {/* Start Hour Input as Autocomplete (freeSolo allows manual entry) */}
               <Autocomplete
                 freeSolo
                 options={TIME_OPTIONS}
-                ListboxProps={{
-                  style: { maxHeight: ITEM_HEIGHT * 6 },
-                }}
+                ListboxProps={{ style: { maxHeight: ITEM_HEIGHT * 6 } }}
                 value={values.startHour}
                 onChange={(event, newValue) => {
                   setFieldValue("startHour", newValue || "");
@@ -168,14 +183,10 @@ const EventFormModal: React.FC<EventFormModalProps> = ({ open, initialData, onCl
                   />
                 )}
               />
-
-              {/* End Hour Input as Autocomplete (freeSolo allows manual entry) */}
               <Autocomplete
                 freeSolo
                 options={TIME_OPTIONS}
-                ListboxProps={{
-                  style: { maxHeight: ITEM_HEIGHT * 6 },
-                }}
+                ListboxProps={{ style: { maxHeight: ITEM_HEIGHT * 6 } }}
                 value={values.endHour}
                 onChange={(event, newValue) => {
                   setFieldValue("endHour", newValue || "");
