@@ -7,7 +7,7 @@ import * as Yup from "yup";
 import dayjs from "dayjs";
 import { Reminder } from "../types";
 import { deleteReminder } from "../api";
-import "../styles/EventFormModal.css"; // Import the new CSS for EventFormModal
+import "../styles/EventFormModal.css"; 
 
 interface EventFormModalProps {
   open: boolean;

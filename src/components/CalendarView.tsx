@@ -18,7 +18,7 @@ import EventFormModal from "./EventFormModal";
 import DaySchedule from "./DaySchedule";
 
 const CalendarView: React.FC = () => {
-  // We'll determine 'today' and 'one year from today' once, upon component mount
+
   const today = new Date();
   const oneYearFromToday = dayjs(today).add(1, "year").toDate();
 
@@ -102,17 +102,14 @@ const CalendarView: React.FC = () => {
     );
   };
 
-  // Called when user clicks on a day in the calendar
   const handleDayClick = (date: Date) => {
-    // If date is out of range, do nothing
+
     if (date < today || date > oneYearFromToday) return;
     setSelectedDate(date);
   };
 
-  // Called when user clicks an hour slot in DaySchedule
   const handleAddReminder = (hour: number) => {
     if (!selectedDate) return;
-    // Double check the date is within allowed range
     if (selectedDate < today || selectedDate > oneYearFromToday) return;
 
     const start = dayjs(selectedDate).hour(hour).minute(0).second(0);
@@ -128,12 +125,11 @@ const CalendarView: React.FC = () => {
     setModalOpen(true);
   };
 
-  // Called when user clicks an existing reminder in DaySchedule
+
   const handleEditReminder = (rem: Reminder) => {
     if (!selectedDate) return;
 
     const holiday = getHolidayForDate(selectedDate);
-    // If this reminder matches a holiday name, skip editing (our rule)
     if (holiday && rem.title === (holiday.localName || holiday.name)) {
       return;
     }

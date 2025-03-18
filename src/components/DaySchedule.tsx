@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { Box, Typography, Paper } from "@mui/material";
 import dayjs from "dayjs";
 import { Reminder, Holiday } from "../types";
-import "../styles/DaySchedule.css"; // Import the new CSS for DaySchedule
+import "../styles/DaySchedule.css";
 
 interface DayScheduleProps {
   selectedDate: Date;
@@ -32,7 +32,6 @@ const DaySchedule: React.FC<DayScheduleProps> = ({
 
   return (
     <Paper className="day-schedule" sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      {/* Sticky Header */}
       <Box className="day-schedule-header">
         <Typography variant="h6" className="day-schedule-title">
           {dayjs(selectedDate).format("dddd, MMM D, YYYY")}
@@ -49,10 +48,9 @@ const DaySchedule: React.FC<DayScheduleProps> = ({
         )}
       </Box>
 
-      {/* Scrollable Hourly Section */}
       <Box ref={scheduleRef} sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
         {hoursInDay.map((hour) => {
-          // Filter reminders by hour:
+
           const hourReminders = reminders.filter((rem) => {
             const startHour = dayjs(rem.startTime).hour();
             return startHour === hour;

@@ -1,6 +1,3 @@
-/* EventFormModal.css */
-
-/* Overall dialog styling to match dark theme */
 .event-form-modal .MuiDialog-paper {
   background-color: #2e2e2e;
   color: #ececec;
@@ -8,7 +5,7 @@
   border-radius: 8px;
 }
 
-/* Dialog title (header) styling */
+
 .event-form-modal .MuiDialogTitle-root {
   color: #fff;
   padding: 16px;
@@ -21,14 +18,13 @@
   color: #fff;
 }
 
-/* Dialog content styling */
+
 .event-form-modal .MuiDialogContent-root {
   background-color: #bbbbbb;
   color: #ececec;
   padding: 16px;
 }
 
-/* TextField styling for form inputs */
 .event-form-modal .MuiTextField-root {
   margin-bottom: 16px;
   background-color: #ffffff;
@@ -36,26 +32,22 @@
   border-radius: 4px;
 }
 
-/* Autocomplete Listbox styling (if needed) */
 .event-form-modal .MuiAutocomplete-listbox {
   background-color: #2e2e2e;
   color: #ececec;
 }
 
-/* Dialog actions styling */
 .event-form-modal .MuiDialogActions-root {
   background-color: #1f1f1f;
   padding: 8px 16px;
 }
 
-/* Buttons styling in the dialog */
 .event-form-modal .MuiButton-root {
   margin: 0 8px;
   color: #fff;
   text-transform: none;
 }
 
-/* Hover effect for buttons */
 .event-form-modal .MuiButton-root:hover {
   background-color: #3b3b3b;
 }
