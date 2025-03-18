@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { Reminder, Holiday } from '../types';
+import axios from "axios";
+import { Reminder, Holiday } from "../types";
 
 const REMINDERS_API_URL = "http://localhost:8080/reminders";
 const HOLIDAYS_API_URL = "https://date.nager.at/api/v3/PublicHolidays/2025/LT";

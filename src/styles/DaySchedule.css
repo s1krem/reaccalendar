@@ -1,6 +1,3 @@
-/* DaySchedule.css */
-
-/* Overall container for the DaySchedule component */
 .day-schedule {
   background-color: #2e2e2e;
   color: #ececec;
@@ -9,7 +6,6 @@
   box-shadow: 0 2px 5px rgba(0,0,0,0.5);
 }
 
-/* Sticky header with date and optional holiday message */
 .day-schedule-header {
   position: sticky;
   top: 0;
@@ -21,14 +17,12 @@
   color: #ececec;
 }
 
-/* Title (date) styling inside header */
 .day-schedule-header .day-schedule-title {
   margin: 0;
   font-size: 1.25rem;
   font-weight: bold;
 }
 
-/* Holiday message container styling */
 .day-schedule-header .day-schedule-holiday {
   background-color: #2a8041;
   border: 1px solid #5a2a2a;
@@ -39,7 +33,6 @@
   color: #ffffff;
 }
 
-/* Each hour row container */
 .day-schedule-hour {
   border-bottom: 1px solid #444;
   padding: 8px;
@@ -51,13 +44,11 @@
   background-color: #8b8b8b;
 }
 
-/* Styling for the hour label */
 .day-schedule-hour .hour-label {
   font-weight: bold;
   margin-bottom: 4px;
 }
 
-/* Reminder pill inside an hour slot */
 .day-schedule-reminder {
   background-color: #3a3a3a;
   border: 1px solid #ffffff;
@@ -69,7 +60,6 @@
   transition: background-color 0.2s ease;
 }
 
-/* Hover effect for reminder items */
 .day-schedule-reminder:hover {
   background-color: #444;
 }

@@ -131,7 +131,6 @@
   margin-top: 2px;
 }
 
-/* Make past and out-of-range dates visually distinct */
 .disabled-tile {
   background-color: #2a2a2a !important;
   color: #666 !important;
@@ -139,19 +138,16 @@
   opacity: 0.5;
 }
 
-/* Make event days more visually appealing */
 .has-event {
   background-color: #5a2a2a !important;
   border: 1px solid #8b0000;
   border-radius: 4px;
 }
 
-/* Hover effect for regular days */
 .react-calendar__tile:hover:not(.disabled-tile) {
   background-color: #444 !important;
 }
 
-/* Disabled navigation buttons */
 .react-calendar__navigation button:disabled {
   background-color: #2a2a2a !important;
   color: #666 !important;
