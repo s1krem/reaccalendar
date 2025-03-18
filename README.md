@@ -1,6 +1,32 @@
-# Getting Started with Create React App
+# ReactCalendar
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A simple React-based calendar application for managing events and appointments. Built with **Create React App**, this project offers an interactive interface to view, create, and manage your calendar events.
+
+## Project Structure
+- **`src/api`**: Contains API-related logic or service functions.
+- **`src/components`**: Reusable UI components such as the calendar view, schedule display, and event form modal.
+- **`src/styles`**: Global and component-specific styles (CSS).
+- **`src/types`**: TypeScript definitions for improved type safety.
+
+## Getting Started
+
+### Prerequisites
+- **Node.js** (v14+ recommended)
+- **npm** or **yarn** installed
+
+### Installation
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/s1krem/reaccalendar.git
+
+2. **Navigate to the project directory:**:
+    ```bash
+    cd reaccalendar
+
+3. **Install dependencies**:
+    ```bash
+    npm install
+
 
 ## Available Scripts
 
