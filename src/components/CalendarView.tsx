@@ -18,9 +18,8 @@ import EventFormModal from "./EventFormModal";
 import DaySchedule from "./DaySchedule";
 
 const CalendarView: React.FC = () => {
-
-  const today = new Date();
-  const oneYearFromToday = dayjs(today).add(1, "year").toDate();
+  const today = dayjs().startOf("day").toDate();
+  const oneYearFromToday = dayjs(today).add(1, "year").endOf("day").toDate();
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [holidays, setHolidays] = useState<Holiday[]>([]);
@@ -54,19 +53,16 @@ const CalendarView: React.FC = () => {
     return holidays.find((hol) => hol.date === dateString);
   };
 
-  //so long because react-calendar style css is not working properly
   const tileClassName = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return "";
   
-    const todayStart = dayjs().startOf("day").toDate();
-  
-  if (dayjs(date).isSame(todayStart, "day")) {
-    return "today-tile";
-  }
-    const oneYearFromToday = dayjs(today).add(1, "year").toDate();
-  
-    const isPastDate = date < today;
-    const isOutOfRange = date > oneYearFromToday;
+    const todayStart = dayjs().startOf("day");
+    if (dayjs(date).isSame(todayStart, "day")) {
+      return "today-tile";
+    }
+    
+    const isPastDate = dayjs(date).isBefore(dayjs(today), "day");
+    const isOutOfRange = dayjs(date).isAfter(dayjs(oneYearFromToday), "day");
     const hasReminders = getRemindersForDate(date).length > 0;
     const hasHoliday = !!getHolidayForDate(date);
   
@@ -76,7 +72,6 @@ const CalendarView: React.FC = () => {
     return "";
   };
   
-
   const tileContent = ({ date, view }: { date: Date; view: string }) => {
     if (view !== "month") return null;
     const holiday = getHolidayForDate(date);
@@ -103,14 +98,15 @@ const CalendarView: React.FC = () => {
   };
 
   const handleDayClick = (date: Date) => {
-
-    if (date < today || date > oneYearFromToday) return;
+    if (dayjs(date).isBefore(dayjs(today), "day") || dayjs(date).isAfter(dayjs(oneYearFromToday), "day"))
+      return;
     setSelectedDate(date);
   };
 
   const handleAddReminder = (hour: number) => {
     if (!selectedDate) return;
-    if (selectedDate < today || selectedDate > oneYearFromToday) return;
+    if (dayjs(selectedDate).isBefore(dayjs(today), "day") || dayjs(selectedDate).isAfter(dayjs(oneYearFromToday), "day"))
+      return;
 
     const start = dayjs(selectedDate).hour(hour).minute(0).second(0);
     const end = start.add(1, "hour");
@@ -125,7 +121,6 @@ const CalendarView: React.FC = () => {
     setModalOpen(true);
   };
 
-
   const handleEditReminder = (rem: Reminder) => {
     if (!selectedDate) return;
 
@@ -137,7 +132,6 @@ const CalendarView: React.FC = () => {
     setModalOpen(true);
   };
 
-  // Called when user submits the modal form
   const handleFormSubmit = async (data: Reminder) => {
     try {
       if (data.id) {
@@ -151,7 +145,6 @@ const CalendarView: React.FC = () => {
     }
   };
 
-  // Called when user clicks the close button on the schedule panel
   const handleCloseSchedule = () => {
     setSelectedDate(null);
   };
